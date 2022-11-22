@@ -5,21 +5,39 @@
   "main": "app.js",
   "scripts": {
     "compile": "tsc -w",
-    "start": "node ./dist/app.js",
-    "dev": "nodemon ./src/app.ts"
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "KennethJT1 <oluwatomiwa96@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "http-errors": "^2.0.0",
+    "joi": "^17.7.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.8.0",
     "nodemon": "^2.0.20",
-    "sequelize": "^6.25.7",
-    "sqlite3": "^5.1.2"
+    "sequelize": "^6.25.8",
+    "sqlite3": "^5.1.2",
+    "twilio": "^3.83.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/http-errors": "^2.0.1",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/morgan": "^1.9.3",
+    "@types/nodemailer": "^6.4.6",
     "@types/sequelize": "^4.28.14",
-    "@types/sqlite3": "^3.1.8"
-  }
+    "@types/sqlite3": "^3.1.8",
+    "@types/uuid": "^8.3.4",
+    "typescript": "^4.9.3"
+  },
+  "repository": "https://github.com/KennethJT1/team_3_week_8_task.git"
 }

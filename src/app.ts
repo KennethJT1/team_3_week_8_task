@@ -1,16 +1,36 @@
-import express, { Request, Response, NextFunction} from 'express';
-import dotenv from 'dotenv';
-import {db}  from './config/database';
+import express,{Request, Response} from 'express';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser'
+import userRouter from './routes/Users'
+import indexRouter from './routes/index'
+import adminRouter from './routes/Admin'
+import agentRouter from './routes/Agent'
+import {db} from './config/index'
 
-const app = express();
+// Sequelize connection
+db.sync().then(()=>{
+    console.log("Db connected successfuly")
+}).catch(err=>{
+    console.log(err)
+})
 
-//dotenv
-dotenv.config();
-
-//Database connection
-db.sync().then(() => console.log('Database connected...')).catch(err=> console.log(err))
+const app = express()
 
 
 
-const port = process.env.PORT
-app.listen(port, () => console.log(`Server is listening on port http://localhost:${port}`))
+app.use(express.json());
+app.use(logger('dev'));
+app.use(cookieParser())
+
+//Router middleware
+app.use('/',  indexRouter)
+app.use('/users', userRouter)
+app.use('/admins', adminRouter)
+app.use('/agents', agentRouter)
+
+const port = 4040
+app.listen(port, ()=>{
+    console.log(`Server running on http://localhost:${port}`)
+})
+
+export default app
