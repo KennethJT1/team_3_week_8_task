@@ -205,6 +205,7 @@ export const resendOTP = async (req: Request, res: Response) => {
   try {
     const token = req.params.signature;
     const decode = await verifySignature(token);
+
     // check if the user is a registered user
     const User = (await UserInstance.findOne({
       where: { email: decode.email },

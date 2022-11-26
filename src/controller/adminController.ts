@@ -15,6 +15,80 @@ import { UserAttributes, UserInstance } from "../model/userModel";
 import { v4 as uuidv4 } from "uuid";
 import { AgentAttributes, AgentInstance } from "../model/agentModel";
 
+
+/** ================= Super Admin ===================== **/
+export const SuperAdmin = async (req: JwtPayload, res: Response) => {
+  try {
+    const { email, phone, password, fullName, userName, address } = req.body;
+    const uuiduser = uuidv4();
+
+    const validateResult = adminSchema.validate(req.body, option);
+    if (validateResult.error) {
+      return res.status(400).json({
+        Error: validateResult.error.details[0].message,
+      });
+    }
+
+    // Generate salt
+    const salt = await GenerateSalt();
+    const adminPassword = await GeneratePassword(password, salt);
+
+    // Generate OTP
+    const { otp, expiry } = GenerateOTP();
+
+    // check if the admin exist
+    const Admin = (await UserInstance.findOne({
+      where: { email: email },
+    })) as unknown as UserAttributes;
+
+    //Create Admin
+    if (!Admin) {
+      await UserInstance.create({
+        id: uuiduser,
+        email,
+        password: adminPassword,
+        fullName,
+        userName,
+        salt,
+        address,
+        phone,
+        otp,
+        otp_expiry: expiry,
+        lng: 0,
+        lat: 0,
+        verified: true,
+        role: "superadmin",
+      });
+
+      // check if the admin exist
+      const Admin = (await UserInstance.findOne({
+        where: { email: email },
+      })) as unknown as UserAttributes;
+
+      //Generate signature for user
+      let signature = await Generatesignature({
+        id: Admin.id,
+        email: Admin.email,
+        verified: Admin.verified
+      });
+
+      return res.status(201).json({
+        message: " Super Admin created successfully",
+        signature,
+        verified: Admin.verified,
+      });
+    }
+    return res.status(400).json({
+      message: " Super Admin already exist",
+    });
+  } catch (err) {
+    res.status(500).json({
+      Error: "Internal server Error",
+      route: "/admins/create-admin",
+    });
+  }
+};
+
 /** ================= Register Admin ===================== **/
 export const AdminRegister = async (req: JwtPayload, res: Response) => {
   try {
@@ -101,78 +175,7 @@ export const AdminRegister = async (req: JwtPayload, res: Response) => {
   }
 };
 
-/** ================= Super Admin ===================== **/
-export const SuperAdmin = async (req: JwtPayload, res: Response) => {
-  try {
-    const { email, phone, password, fullName, userName, address } = req.body;
-    const uuiduser = uuidv4();
 
-    const validateResult = adminSchema.validate(req.body, option);
-    if (validateResult.error) {
-      return res.status(400).json({
-        Error: validateResult.error.details[0].message,
-      });
-    }
-
-    // Generate salt
-    const salt = await GenerateSalt();
-    const adminPassword = await GeneratePassword(password, salt);
-
-    // Generate OTP
-    const { otp, expiry } = GenerateOTP();
-
-    // check if the admin exist
-    const Admin = (await UserInstance.findOne({
-      where: { email: email },
-    })) as unknown as UserAttributes;
-
-    //Create Admin
-    if (!Admin) {
-      await UserInstance.create({
-        id: uuiduser,
-        email,
-        password: adminPassword,
-        fullName,
-        userName,
-        salt,
-        address,
-        phone,
-        otp,
-        otp_expiry: expiry,
-        lng: 0,
-        lat: 0,
-        verified: true,
-        role: "superadmin",
-      });
-
-      // check if the admin exist
-      const Admin = (await UserInstance.findOne({
-        where: { email: email },
-      })) as unknown as UserAttributes;
-
-      //Generate signature for user
-      let signature = await Generatesignature({
-        id: Admin.id,
-        email: Admin.email,
-        verified: Admin.verified,
-      });
-
-      return res.status(201).json({
-        message: " Super Admin created successfully",
-        signature,
-        verified: Admin.verified,
-      });
-    }
-    return res.status(400).json({
-      message: " Super Admin already exist",
-    });
-  } catch (err) {
-    res.status(500).json({
-      Error: "Internal server Error",
-      route: "/admins/create-admin",
-    });
-  }
-};
 
 /** ================= Create Agent ===================== **/
 export const createAgent = async (req: JwtPayload, res: Response) => {
@@ -246,7 +249,8 @@ export const deleteAgent = async(req:JwtPayload,res:Response)=>{
     const id = req.user.id;
     const agentid = req.params.agentid
     const Admin = await UserInstance.findOne({where:{id:id}}) as unknown as UserAttributes
-if(Admin.role === "superadmin"|| Admin.role === "admin"){
+
+    if(Admin.role === "superadmin"|| Admin.role === "admin"){
  
    const deletedAgent = await AgentInstance.destroy({where:{id:agentid}}) 
    return res.status(201).json({

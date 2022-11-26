@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 import { AgentAttributes, AgentInstance } from "../model/agentModel";
 import {
   Generatesignature,
   loginSchema,
   option,
   updateHouseSchema,
-  updateSchema,
   validatePassword,
 } from "../utils";
 import { HouseAttributes, HouseInstance } from "../model/houseModel";
@@ -34,7 +33,7 @@ export const agentLogin = async (req: Request, res: Response) => {
         Agent.password,
         Agent.salt
       );
-      console.log(validation)
+      
       if (validation) {
         //Generate signature for agent
         let signature = await Generatesignature({
@@ -80,6 +79,7 @@ export const createHouse = async (req: JwtPayload, res: Response) => {
     const Agent = (await AgentInstance.findOne({
       where: { id: id },
     })) as unknown as AgentAttributes;
+
     const houseid = uuidv4();
     if (Agent) {
       const createhouse = await HouseInstance.create({
@@ -114,6 +114,7 @@ export const AgentProfile = async(req:JwtPayload,res:Response)=>{
   try{
     const id = req.agent.id
     const Agent = await AgentInstance.findOne({where:{id:id},
+      
       attributes:["id","name","ownerName","address","phone","pincode","email","rating"],
       include:[{model:HouseInstance, as:"house", 
       attributes:["id","name","description","category","condition","propertySize","price","rating","agentId"]}]}) as unknown as AgentAttributes

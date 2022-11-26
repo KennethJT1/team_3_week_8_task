@@ -7,6 +7,8 @@ import adminRouter from './routes/Admin';
 import agentRouter from './routes/Agent';
 import {db} from './config/index';
 import dotenv from 'dotenv';
+import path from 'path';
+import ejs from 'ejs';
 
 const app = express()
 
@@ -26,6 +28,15 @@ db.sync().then(()=>{
 app.use(express.json());
 app.use(logger('dev'));
 app.use(cookieParser())
+
+//setting up public folder
+app.use(express.static(path.join(process.cwd(), "public")));
+
+
+// //view engine setup for ejs
+app.set("views", path.join(process.cwd(), "views"));
+app.set("view engine", "ejs");
+
 
 //Router middleware
 app.use('/',  indexRouter)
